@@ -262,7 +262,7 @@ export function GoogleCalendarView({
                   return (
                     <div
                       key={`${day}-${hour}`}
-                      className="h-12 p-1 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer relative"
+                      className={`border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer relative ${isMobile ? 'h-8 p-0.5' : 'h-12 p-1'}`}
                       onClick={() => {
                         onDateSelect(day);
                         onEventCreate();
@@ -271,14 +271,14 @@ export function GoogleCalendarView({
                       {dayEvents.map((event) => (
                         <div
                           key={event.id}
-                          className={`${getEventStyle(event)} h-full flex items-center`}
+                          className={`${getEventStyle(event)} flex items-center ${isMobile ? 'h-full text-xs px-1 py-0.5' : 'h-full'}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             onEventSelect(event); 
                           }}
                         >
                           <span className="mr-1">{getEventTypeIcon(event.type)}</span>
-                          {event.title}
+                          {isMobile ? event.title.substring(0, 6) + (event.title.length > 6 ? '...' : '') : event.title}
                         </div>
                       ))}
                     </div>
@@ -300,13 +300,14 @@ export function GoogleCalendarView({
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
         {/* Header */}
         <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-          <div className="p-4 text-center">
-            <div className="text-xs text-gray-500 dark:text-gray-400 uppercase mb-1">
-              {format(currentDate, 'EEEE')}
+          <div className={`text-center ${isMobile ? 'p-3' : 'p-4'}`}>
+            <div className={`text-gray-500 dark:text-gray-400 uppercase mb-1 ${isMobile ? 'text-xs' : 'text-xs'}`}>
+              {isMobile ? format(currentDate, 'EEE') : format(currentDate, 'EEEE')}
             </div>
             <div className={`
-              text-2xl font-medium
-              ${isToday(currentDate) ? 'bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center mx-auto' : 'text-gray-900 dark:text-white'}
+              font-medium
+              ${isToday(currentDate) ? 'bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto' : 'text-gray-900 dark:text-white'}
+              ${isMobile ? 'w-8 h-8 text-lg' : 'w-10 h-10 text-2xl'}
             `}>
               {format(currentDate, 'd')}
             </div>
@@ -314,16 +315,19 @@ export function GoogleCalendarView({
         </div>
 
         {/* Time slots */}
-        <div className="max-h-[600px] overflow-y-auto">
+        <div className={`max-h-[600px] overflow-y-auto ${isMobile ? 'max-h-[400px]' : ''}`}>
           <div className="grid grid-cols-2">
             {/* Time column */}
             <div className="border-r border-gray-200 dark:border-gray-700">
               {hours.map((hour) => (
                 <div
                   key={hour}
-                  className="h-16 px-4 py-2 text-sm text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-800 text-right flex items-start justify-end"
+                  className={`text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-800 text-right flex items-start justify-end ${isMobile ? 'h-12 px-2 py-1 text-xs' : 'h-16 px-4 py-2 text-sm'}`}
                 >
-                  {hour === 0 ? '12:00 AM' : hour < 12 ? `${hour}:00 AM` : hour === 12 ? '12:00 PM' : `${hour - 12}:00 PM`}
+                  {isMobile 
+                    ? (hour === 0 ? '12A' : hour < 12 ? `${hour}A` : hour === 12 ? '12P' : `${hour - 12}P`)
+                    : (hour === 0 ? '12:00 AM' : hour < 12 ? `${hour}:00 AM` : hour === 12 ? '12:00 PM' : `${hour - 12}:00 PM`)
+                  }
                 </div>
               ))}
             </div>
@@ -340,19 +344,19 @@ export function GoogleCalendarView({
                 return (
                   <div
                     key={hour}
-                    className="h-16 p-2 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                    className={`border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer ${isMobile ? 'h-12 p-1' : 'h-16 p-2'}`}
                     onClick={() => onEventCreate()}
                   >
                     {hourEvents.map((event) => (
                       <div
                         key={event.id}
-                        className={`${getEventStyle(event)} h-full flex items-center mb-1`}
+                        className={`${getEventStyle(event)} flex items-center mb-1 ${isMobile ? 'text-xs px-1 py-0.5' : 'h-full'}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           onEventSelect(event);
                         }}
                       >
-                        <span className="mr-2">{getEventTypeIcon(event.type)}</span>
+                        <span className={`${isMobile ? 'mr-1' : 'mr-2'}`}>{getEventTypeIcon(event.type)}</span>
                         <div className="flex-1">
                           <div className="font-medium">{event.title}</div>
                           {event.time && (

@@ -1130,6 +1130,29 @@ export default function GoogleCalendarClone(): JSX.Element {
         </button>
       )}
 
+      {/* Mobile View Toggle */}
+      {isMobile && (
+        <div className="mobile-view-toggle fixed bottom-4 left-4 z-40">
+          <div className="flex bg-background border border-border rounded-lg shadow-lg p-1">
+            {(['month', 'week', 'day'] as ViewMode[]).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => setViewMode(mode)}
+                className={`
+                  px-3 py-2 text-xs font-medium rounded-md transition-all duration-200
+                  ${viewMode === mode 
+                    ? 'bg-primary text-primary-foreground shadow-sm' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  }
+                `}
+              >
+                {mode.charAt(0).toUpperCase() + mode.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* MiniApp Status (Development Only) */}
       <MiniAppStatus />
     </div>
