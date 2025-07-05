@@ -21,6 +21,7 @@ const createEventSchema = z.object({
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json();
+    console.log('Events POST - received body:', body);
     
     // Check if this is a request to get events (has only walletAddress)
     if (Object.keys(body).length === 1 && 'walletAddress' in body) {
@@ -59,16 +60,28 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const validatedData = createEventSchema.parse(body);
     const { walletAddress, ...eventData } = validatedData;
 
-    // Get user first
-    const user = await prisma.user.findUnique({
+    console.log('Creating event for wallet:', walletAddress);
+    console.log('Event data:', eventData);
+
+    // Get or create user
+    let user = await prisma.user.findUnique({
       where: { walletAddress },
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      console.log('User not found, creating new user for wallet:', walletAddress);
+      // Create user if they don't exist
+      user = await prisma.user.create({
+        data: {
+          walletAddress,
+          displayName: `User ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`,
+          ipfsBackupEnabled: false,
+          autoSyncEnabled: true,
+        },
+      });
+      console.log('Created new user:', user);
+    } else {
+      console.log('Found existing user:', user);
     }
 
     // Create event
@@ -88,11 +101,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     });
 
+    console.log('Successfully created event:', event);
     return NextResponse.json(event);
   } catch (error) {
     console.error('Error in events POST:', error);
     
     if (error instanceof z.ZodError) {
+      console.error('Validation errors:', error.errors);
       return NextResponse.json(
         { error: 'Invalid request data', details: error.errors },
         { status: 400 }
@@ -100,7 +115,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

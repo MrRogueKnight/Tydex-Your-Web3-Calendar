@@ -365,12 +365,23 @@ export default function GoogleCalendarClone(): JSX.Element {
   // Event handlers with enhanced error handling
   const handleEventCreate = useCallback((): void => {
     try {
+      console.log('handleEventCreate called - wallet status:', { isConnected, address });
+      
       if (!isConnected || !address) {
         toast.error('Please connect your wallet first');
         return;
       }
+      
+      // Validate wallet address format
+      const walletRegex = /^0x[a-fA-F0-9]{40}$/;
+      if (!walletRegex.test(address)) {
+        toast.error('Invalid wallet address format');
+        return;
+      }
+      
       setSelectedEvent(null);
       setIsEventModalOpen(true);
+      console.log('Event modal opened successfully');
     } catch (error) {
       console.error('Error opening event modal:', error);
       toast.error('Failed to open event creation modal');
@@ -393,8 +404,18 @@ export default function GoogleCalendarClone(): JSX.Element {
 
   // Enhanced handleEventSave function that matches your API schema exactly
   const handleEventSave = useCallback(async (eventData: Partial<Event>): Promise<void> => {
+    console.log('handleEventSave called with data:', eventData);
+    console.log('Current wallet status:', { address, isConnected });
+    
     if (!address || !isConnected) {
       toast.error('Please connect your wallet first');
+      return;
+    }
+    
+    // Validate wallet address format
+    const walletRegex = /^0x[a-fA-F0-9]{40}$/;
+    if (!walletRegex.test(address)) {
+      toast.error('Invalid wallet address format');
       return;
     }
     
@@ -428,9 +449,9 @@ export default function GoogleCalendarClone(): JSX.Element {
         return;
       }
       
-      console.log('Sending event data:', apiData);
+      console.log('Sending event data to API:', apiData);
       
-      let response = await fetch(url, {
+      const response = await fetch(url, {
         method,
         headers: { 
           'Content-Type': 'application/json',
@@ -441,42 +462,16 @@ export default function GoogleCalendarClone(): JSX.Element {
 
       console.log('Event save response:', response.status, response.statusText);
 
-      // If user not found, auto-create user and retry event creation
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
         console.error('API Error Response:', errorData);
         
-        if (response.status === 404 && errorData.error === 'User not found') {
-          // Try to create the user, then retry event creation
-          console.log('User not found, creating user and retrying event creation...');
-          const createUserRes = await fetch('/api/user/profile', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ walletAddress: address }),
-          });
-          if (!createUserRes.ok) {
-            const createUserErr = await createUserRes.json().catch(() => ({ error: 'Unknown error' }));
-            throw new Error(createUserErr.error || 'Failed to auto-create user');
-          }
-          // Retry event creation
-          response = await fetch(url, {
-            method,
-            headers: { 
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify(apiData),
-          });
-          if (!response.ok) {
-            const retryError = await response.json().catch(() => ({ error: 'Unknown error' }));
-            throw new Error(retryError.error || `HTTP ${response.status}: Failed to save event after user creation`);
-          }
-        } else if (response.status === 400 && errorData.details) {
+        if (response.status === 400 && errorData.details) {
           // Handle Zod validation errors
           const validationErrors = errorData.details.map((err: any) => err.message).join(', ');
           throw new Error(`Validation error: ${validationErrors}`);
         } else {
-          throw new Error(errorData.error || `HTTP ${response.status}: Failed to save event`);
+          throw new Error(errorData.error || errorData.details || `HTTP ${response.status}: Failed to save event`);
         }
       }
       
