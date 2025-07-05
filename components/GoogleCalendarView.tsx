@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   format, 
   startOfMonth, 
@@ -29,6 +29,19 @@ export function GoogleCalendarView({
   onEventCreate,
   isLoading
 }: GoogleCalendarViewProps): JSX.Element {
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   const getEventsForDate = (date: Date): Event[] => {
     return events.filter(event => 
@@ -59,8 +72,10 @@ export function GoogleCalendarView({
     const days: JSX.Element[] = [];
     let day = startDate;
 
-    // Week header
-    const weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    // Week header - shorter names for mobile
+    const weekDays = isMobile 
+      ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+      : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     
     while (day <= endDate) {
       const dayEvents = getEventsForDate(day);
@@ -77,52 +92,74 @@ export function GoogleCalendarView({
             hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors relative
             ${isCurrentMonth ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800'}
             ${isSelected ? 'ring-2 ring-blue-500' : ''}
+            ${isMobile ? 'min-h-[80px] p-1' : ''}
           `}
           onClick={() => onDateSelect(currentDay)}
+          tabIndex={0}
+          role="button"
+          aria-label={`Select ${format(currentDay, 'EEEE, MMMM d, yyyy')}`}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onDateSelect(currentDay);
+            }
+          }}
         >
           <div className={`
             inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium
             ${isDayToday ? 'bg-blue-600 text-white' : isCurrentMonth ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'}
             ${isSelected && !isDayToday ? 'bg-blue-100 text-blue-600 dark:bg-blue-900' : ''}
+            ${isMobile ? 'w-6 h-6 text-xs' : ''}
           `}>
             {format(currentDay, 'd')}
           </div>
           
-          <div className="mt-2 space-y-1">
-            {dayEvents.slice(0, 3).map((event) => (
+          <div className={`mt-2 space-y-1 ${isMobile ? 'mt-1 space-y-0.5' : ''}`}>
+            {dayEvents.slice(0, isMobile ? 2 : 3).map((event) => (
               <div
                 key={event.id}
-                className={getEventStyle(event)}
+                className={`${getEventStyle(event)} ${isMobile ? 'text-xs px-1 py-0.5' : ''}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   onEventSelect(event); 
                 }}
                 title={`${event.title}${event.time ? ` at ${event.time}` : ''}`}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onEventSelect(event);
+                  }
+                }}
               >
                 <span className="mr-1">{getEventTypeIcon(event.type)}</span>
-                {event.title}
+                {isMobile ? event.title.substring(0, 8) + (event.title.length > 8 ? '...' : '') : event.title}
               </div>
             ))}
-            {dayEvents.length > 3 && (
-              <div className="text-xs text-gray-500 dark:text-gray-400 pl-2">
-                +{dayEvents.length - 3} more
+            {dayEvents.length > (isMobile ? 2 : 3) && (
+              <div className={`text-xs text-gray-500 dark:text-gray-400 pl-2 ${isMobile ? 'text-xs pl-1' : ''}`}>
+                +{dayEvents.length - (isMobile ? 2 : 3)} more
               </div>
             )}
           </div>
 
-          {/* Quick add button on hover */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDateSelect(currentDay);
-              onEventCreate();
-            }}
-            className="absolute bottom-1 right-1 w-6 h-6 opacity-0 hover:opacity-100 transition-opacity bg-white dark:bg-gray-800 shadow-sm"
-          >
-            <Plus className="w-3 h-3" />
-          </Button>
+          {/* Quick add button - only show on desktop or when hovering */}
+          {!isMobile && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDateSelect(currentDay);
+                onEventCreate();
+              }}
+              className="absolute bottom-1 right-1 w-6 h-6 opacity-0 hover:opacity-100 transition-opacity bg-white dark:bg-gray-800 shadow-sm"
+            >
+              <Plus className="w-3 h-3" />
+            </Button>
+          )}
         </div>
       );
 
@@ -140,6 +177,7 @@ export function GoogleCalendarView({
                 py-3 px-4 text-center text-sm font-medium bg-gray-50 dark:bg-gray-800
                 ${index < 6 ? 'border-r border-gray-200 dark:border-gray-700' : ''}
                 text-gray-700 dark:text-gray-300
+                ${isMobile ? 'py-2 px-2 text-xs' : ''}
               `}
             >
               {dayName}
@@ -163,10 +201,12 @@ export function GoogleCalendarView({
     return (
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
         {/* Header */}
-        <div className="grid grid-cols-8 border-b border-gray-200 dark:border-gray-700">
-          <div className="py-3 px-4 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
-            <div className="text-xs text-gray-500 dark:text-gray-400">GMT</div>
-          </div>
+        <div className={`grid ${isMobile ? 'grid-cols-7' : 'grid-cols-8'} border-b border-gray-200 dark:border-gray-700`}>
+          {!isMobile && (
+            <div className="py-3 px-4 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+              <div className="text-xs text-gray-500 dark:text-gray-400">GMT</div>
+            </div>
+          )}
           {weekDays.map((day, index) => (
             <div
               key={day.toString()}
@@ -174,15 +214,17 @@ export function GoogleCalendarView({
                 py-3 px-4 text-center bg-gray-50 dark:bg-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700
                 ${index < 6 ? 'border-r border-gray-200 dark:border-gray-700' : ''}
                 ${isSameDay(day, selectedDate) ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                ${isMobile ? 'py-2 px-2' : ''}
               `}
               onClick={() => onDateSelect(day)}
             >
-              <div className="text-xs text-gray-500 dark:text-gray-400 uppercase">
-                {format(day, 'EEE')}
+              <div className={`text-gray-500 dark:text-gray-400 uppercase ${isMobile ? 'text-xs' : 'text-xs'}`}>
+                {isMobile ? format(day, 'EEE').substring(0, 2) : format(day, 'EEE')}
               </div>
               <div className={`
-                text-lg font-medium mt-1
-                ${isToday(day) ? 'bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mx-auto' : 'text-gray-900 dark:text-white'}
+                font-medium mt-1
+                ${isToday(day) ? 'bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto' : 'text-gray-900 dark:text-white'}
+                ${isMobile ? 'w-6 h-6 text-sm' : 'w-8 h-8 text-lg'}
               `}>
                 {format(day, 'd')}
               </div>
@@ -191,19 +233,21 @@ export function GoogleCalendarView({
         </div>
 
         {/* Time slots */}
-        <div className="max-h-[600px] overflow-y-auto">
-          <div className="grid grid-cols-8">
+        <div className={`max-h-[600px] overflow-y-auto ${isMobile ? 'max-h-[400px]' : ''}`}>
+          <div className={`grid ${isMobile ? 'grid-cols-7' : 'grid-cols-8'}`}>
             {/* Time column */}
-            <div className="border-r border-gray-200 dark:border-gray-700">
-              {hours.map((hour) => (
-                <div
-                  key={hour}
-                  className="h-12 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-800 text-right"
-                >
-                  {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}
-                </div>
-              ))}
-            </div>
+            {!isMobile && (
+              <div className="border-r border-gray-200 dark:border-gray-700">
+                {hours.map((hour) => (
+                  <div
+                    key={hour}
+                    className="h-12 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-800 text-right"
+                  >
+                    {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}
+                  </div>
+                ))}
+              </div>
+            )}
             
             {/* Day columns */}
             {weekDays.map((day, dayIndex) => (
