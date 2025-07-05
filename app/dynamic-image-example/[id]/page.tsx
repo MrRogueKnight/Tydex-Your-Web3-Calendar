@@ -2,7 +2,7 @@ import App from "@/components/Home";
 import { env } from "@/lib/env";
 import { Metadata } from "next";
 
-const appUrl = env.NEXT_PUBLIC_URL;
+const appUrl = env.NEXT_PUBLIC_URL || 'http://localhost:3000';
 
 export async function generateMetadata({
   params,
@@ -31,10 +31,10 @@ export async function generateMetadata({
   };
 
   return {
-    title: "Mini App Starter",
+    title: "Tydex Calendar",
     openGraph: {
-      title: "Mini App Starter",
-      description: "Mini App Next Template",
+      title: "Tydex Calendar",
+      description: "Your Web3 Calendar",
       images: [{ url: imageUrl.toString() }],
     },
     other: {

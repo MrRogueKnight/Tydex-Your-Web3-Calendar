@@ -32,7 +32,7 @@ export async function GET(
     const { id } = await params;
 
     // Get the application's base URL from environment variables
-    const appUrl = env.NEXT_PUBLIC_URL;
+    const appUrl = env.NEXT_PUBLIC_URL || 'http://localhost:3000';
 
     // Load the logo image from the public directory
     const logoImage = await loadImage(`${appUrl}/images/icon.png`);
@@ -61,6 +61,7 @@ export async function GET(
             src={`data:image/png;base64,${Buffer.from(logoImage).toString(
               "base64"
             )}`}
+            alt="Tydex Calendar Logo"
             style={{
               width: "100px",
               marginBottom: "20px",
