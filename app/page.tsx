@@ -398,7 +398,7 @@ export default function GoogleCalendarClone(): JSX.Element {
       
       console.log('Sending event data:', apiData);
       
-      const response = await fetch(url, {
+      let response = await fetch(url, {
         method,
         headers: { 
           'Content-Type': 'application/json',
@@ -409,17 +409,43 @@ export default function GoogleCalendarClone(): JSX.Element {
 
       console.log('Event save response:', response.status, response.statusText);
 
+      // If user not found, auto-create user and retry event creation
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
         console.error('API Error Response:', errorData);
         
-        if (response.status === 400 && errorData.details) {
+        if (response.status === 404 && errorData.error === 'User not found') {
+          // Try to create the user, then retry event creation
+          console.log('User not found, creating user and retrying event creation...');
+          const createUserRes = await fetch('/api/user/profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ walletAddress: address }),
+          });
+          if (!createUserRes.ok) {
+            const createUserErr = await createUserRes.json().catch(() => ({ error: 'Unknown error' }));
+            throw new Error(createUserErr.error || 'Failed to auto-create user');
+          }
+          // Retry event creation
+          response = await fetch(url, {
+            method,
+            headers: { 
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify(apiData),
+          });
+          if (!response.ok) {
+            const retryError = await response.json().catch(() => ({ error: 'Unknown error' }));
+            throw new Error(retryError.error || `HTTP ${response.status}: Failed to save event after user creation`);
+          }
+        } else if (response.status === 400 && errorData.details) {
           // Handle Zod validation errors
           const validationErrors = errorData.details.map((err: any) => err.message).join(', ');
           throw new Error(`Validation error: ${validationErrors}`);
+        } else {
+          throw new Error(errorData.error || `HTTP ${response.status}: Failed to save event`);
         }
-        
-        throw new Error(errorData.error || `HTTP ${response.status}: Failed to save event`);
       }
       
       const savedEvent = await response.json();
