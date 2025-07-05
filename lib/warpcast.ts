@@ -19,8 +19,8 @@ export async function getFarcasterManifest() {
       splashImageUrl: `${appUrl}/images/splash.png`,
       splashBackgroundColor: "#4F46E5",
       webhookUrl: `${appUrl}/api/webhook`,
-      subtitle: "Plan, Share & Sync Your Web3 Events",
-      description: "Tydex is your decentralized calendar hub. Discover, create, and share Web3 events all seamlessly integrated with Farcaster. Stay in sync with your favorite communities and never miss out on the action.",
+      subtitle: "Plan Share Sync Web3 Events",
+      description: "Tydex is your decentralized calendar hub. Discover, create, and share Web3 events seamlessly integrated with Farcaster.",
       primaryCategory: "productivity",
       tags: [
         "calendar",
