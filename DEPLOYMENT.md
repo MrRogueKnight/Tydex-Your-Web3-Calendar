@@ -4,6 +4,18 @@
 
 If you're experiencing build failures, follow these steps:
 
+### 0. Check Node.js Version
+
+**Farcaster Mini Apps require Node.js 22.11.0 or higher:**
+
+```bash
+node --version
+```
+
+If your version is lower than 22.11.0, update Node.js:
+- **Windows/Mac**: Download from [nodejs.org](https://nodejs.org)
+- **Linux**: Use nvm: `nvm install --lts && nvm use --lts`
+
 ### 1. Clean Install Dependencies
 
 **On Windows:**

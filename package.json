@@ -17,6 +17,7 @@
     "@farcaster/frame-node": "^0.0.31",
     "@farcaster/frame-sdk": "^0.0.64",
     "@farcaster/frame-wagmi-connector": "^0.0.53",
+    "@farcaster/miniapp-sdk": "^0.0.1",
     "@frames.js/debugger": "^0.5.0",
     "@hookform/resolvers": "^5.1.1",
     "@prisma/client": "^6.11.1",
@@ -68,6 +69,6 @@
     "typescript": "^5.8.3"
   },
   "engines": {
-    "node": ">=18.0.0 <21.0.0"
+    "node": ">=22.11.0"
   }
 }

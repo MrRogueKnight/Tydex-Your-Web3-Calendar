@@ -9,6 +9,8 @@ import { SupportModal } from '@/components/SupportModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { useMiniAppSDK } from '@/hooks/use-miniapp-sdk';
+import { MiniAppStatus } from '@/components/MiniAppStatus';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -104,6 +106,7 @@ const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) 
 export default function GoogleCalendarClone(): JSX.Element {
   const { address, isConnected } = useAccount();
   const { theme, setTheme } = useTheme();
+  const { isReady: isMiniAppReady, isLoading: isMiniAppLoading, error: miniAppError } = useMiniAppSDK();
   
   // State management
   const [events, setEvents] = useState<Event[]>([]);
@@ -533,6 +536,17 @@ export default function GoogleCalendarClone(): JSX.Element {
   // Error boundary
   if (error && !isConnected) {
     return <ErrorState error={error} onRetry={() => setError(null)} />;
+  }
+
+  // MiniApp SDK error
+  if (miniAppError) {
+    console.warn('MiniApp SDK error:', miniAppError);
+    // Continue with the app even if MiniApp SDK fails
+  }
+
+  // MiniApp SDK loading state
+  if (isMiniAppLoading) {
+    return <CalendarSkeleton />;
   }
 
   // Loading state
@@ -1046,6 +1060,9 @@ export default function GoogleCalendarClone(): JSX.Element {
           </div>
         </div>
       )}
+
+      {/* MiniApp Status (Development Only) */}
+      <MiniAppStatus />
     </div>
   );
 }
