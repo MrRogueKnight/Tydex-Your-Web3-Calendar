@@ -125,6 +125,38 @@ export default function GoogleCalendarClone(): JSX.Element {
   const [mounted, setMounted] = useState<boolean>(false);
   const [isLoadingEvents, setIsLoadingEvents] = useState<boolean>(false);
   const [isLoadingUser, setIsLoadingUser] = useState<boolean>(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Close sidebar when clicking outside on mobile
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isMobile && !sidebarCollapsed) {
+        const sidebar = document.querySelector('.google-calendar-sidebar');
+        const target = event.target as Element;
+        
+        if (sidebar && !sidebar.contains(target) && !target.closest('.sidebar-toggle')) {
+          setSidebarCollapsed(true);
+        }
+      }
+    };
+
+    if (isMobile) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isMobile, sidebarCollapsed]);
 
   // Debounced search query
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
@@ -736,7 +768,7 @@ export default function GoogleCalendarClone(): JSX.Element {
             variant="ghost"
             size="icon"
             onClick={toggleSidebar}
-            className="mr-4 hover:bg-muted"
+            className="sidebar-toggle mr-4 hover:bg-muted"
           >
             <Menu className="w-5 h-5" />
           </Button>
@@ -1085,6 +1117,17 @@ export default function GoogleCalendarClone(): JSX.Element {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Mobile Floating Action Button */}
+      {isMobile && (
+        <button
+          onClick={handleEventCreate}
+          className="fab fixed bottom-4 right-4 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 transition-all duration-200 flex items-center justify-center z-40"
+          aria-label="Create new event"
+        >
+          <Plus className="w-6 h-6" />
+        </button>
       )}
 
       {/* MiniApp Status (Development Only) */}
