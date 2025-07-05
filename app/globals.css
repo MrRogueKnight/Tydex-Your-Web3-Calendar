@@ -1135,3 +1135,18 @@
     color: #000 !important;
   }
 }
+
+/* Farcaster Mini App container sizing */
+.farcaster-miniapp-container {
+  width: 424px;
+  max-width: 100vw;
+  height: 695px;
+  max-height: 100vh;
+  margin: 0 auto;
+  overflow: auto;
+  background: var(--background, #18181b);
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+}

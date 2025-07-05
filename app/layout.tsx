@@ -3,6 +3,7 @@ import './globals.css';
 import { Providers } from './providers';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import type { Metadata } from 'next';
+import MiniAppContainer from "@/components/MiniAppContainer";
 
 export const metadata: Metadata = {
   title: 'Tydex - Web3 Calendar',
@@ -22,7 +23,9 @@ export default function RootLayout({
       <body className="min-h-screen bg-background font-sans antialiased">
         <ErrorBoundary>
           <Providers>
-            {children}
+            <MiniAppContainer>
+              {children}
+            </MiniAppContainer>
           </Providers>
         </ErrorBoundary>
       </body>
