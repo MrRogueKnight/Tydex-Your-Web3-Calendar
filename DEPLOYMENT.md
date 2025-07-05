@@ -48,28 +48,41 @@ In your Vercel project dashboard, go to Settings > Environment Variables and add
 ### Required Environment Variables:
 
 ```env
-# Database
+# Database (REQUIRED)
 DATABASE_URL="postgresql://username:password@host:port/database"
 
-# JWT Secret (generate a random string)
+# JWT Secret (REQUIRED - generate a random string)
 JWT_SECRET="your-super-secret-jwt-key-here"
 
-# Neynar API (for Farcaster integration)
+# Neynar API (REQUIRED - for Farcaster integration)
 NEYNAR_API_KEY="your-neynar-api-key"
 
-# Redis (for notifications)
-REDIS_URL="redis://username:password@host:port"
-REDIS_TOKEN="your-redis-token"
-
-# Public URLs
+# Public URLs (REQUIRED)
 NEXT_PUBLIC_URL="https://your-app.vercel.app"
 NEXT_PUBLIC_APP_ENV="production"
 
-# Farcaster Frame Configuration
+# Farcaster Frame Configuration (REQUIRED)
 NEXT_PUBLIC_FARCASTER_HEADER="your-farcaster-header"
 NEXT_PUBLIC_FARCASTER_PAYLOAD="your-farcaster-payload"
 NEXT_PUBLIC_FARCASTER_SIGNATURE="your-farcaster-signature"
 ```
+
+### Optional Environment Variables:
+
+```env
+# Redis (OPTIONAL - for notifications)
+REDIS_URL="redis://username:password@host:port"
+REDIS_TOKEN="your-redis-token"
+```
+
+### How to Get These Values:
+
+1. **DATABASE_URL**: From your PostgreSQL provider (Vercel Postgres, Neon, etc.)
+2. **JWT_SECRET**: Generate a random string (you can use: `openssl rand -base64 32`)
+3. **NEYNAR_API_KEY**: Get from [Neynar](https://neynar.com)
+4. **NEXT_PUBLIC_URL**: Your Vercel deployment URL
+5. **Farcaster Variables**: Follow the [Farcaster Mini Apps guide](https://miniapps.farcaster.xyz/docs/guides/publishing)
+6. **Redis Variables**: From [Upstash](https://upstash.com) (optional)
 
 ## Step 5: Database Migration
 
@@ -86,9 +99,20 @@ npx prisma db push
 
 ## Step 6: Verify Deployment
 
-1. Check your deployment logs in Vercel dashboard
-2. Visit your deployed URL
-3. Test the application functionality
+1. **Check your deployment logs** in Vercel dashboard
+2. **Visit your deployed URL**
+3. **Test the health endpoint**: Visit `https://your-app.vercel.app/api/health`
+4. **Test the application functionality**
+
+### Health Check Endpoint
+
+The `/api/health` endpoint will show you:
+- Environment variable status
+- Database connection status
+- Application version
+- System status
+
+This helps you verify that all required services are properly configured.
 
 ## Troubleshooting
 

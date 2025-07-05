@@ -1,16 +1,15 @@
-import type { FrameNotificationDetails } from "@farcaster/frame-sdk";
 import { redis } from "./redis";
-
-const notificationServiceKey = "farcaster:miniapp";
+import { FrameNotificationDetails } from "@farcaster/frame-core";
 
 function getUserNotificationDetailsKey(fid: number): string {
-  return `${notificationServiceKey}:user:${fid}`;
+  return `user_notification_details:${fid}`;
 }
 
 export async function getUserNotificationDetails(
   fid: number
 ): Promise<FrameNotificationDetails | null> {
   if (!redis) {
+    console.warn("Redis not configured, skipping notification details retrieval");
     return null;
   }
 
@@ -24,6 +23,7 @@ export async function setUserNotificationDetails(
   notificationDetails: FrameNotificationDetails
 ): Promise<void> {
   if (!redis) {
+    console.warn("Redis not configured, skipping notification details storage");
     return;
   }
 
@@ -34,6 +34,7 @@ export async function deleteUserNotificationDetails(
   fid: number
 ): Promise<void> {
   if (!redis) {
+    console.warn("Redis not configured, skipping notification details deletion");
     return;
   }
 
