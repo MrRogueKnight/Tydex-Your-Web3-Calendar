@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verify } from "jose";
+import { jwtVerify } from "jose";
 
 export default async function middleware(req: NextRequest) {
   const authToken = req.cookies.get("auth_token");
@@ -10,7 +10,7 @@ export default async function middleware(req: NextRequest) {
 
   try {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret');
-    const { payload } = await verify(authToken.value, secret);
+    const { payload } = await jwtVerify(authToken.value, secret);
     const requestHeaders = new Headers(req.headers);
     requestHeaders.set("x-user-fid", payload.fid?.toString() || "");
     requestHeaders.set("x-user-wallet", payload.walletAddress?.toString() || "");

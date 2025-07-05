@@ -13,9 +13,13 @@ export async function getUserNotificationDetails(
     return null;
   }
 
-  return await redis.get<FrameNotificationDetails>(
-    getUserNotificationDetailsKey(fid)
-  );
+  try {
+    const result = await redis.get(getUserNotificationDetailsKey(fid));
+    return result as FrameNotificationDetails | null;
+  } catch (error) {
+    console.error("Error getting notification details:", error);
+    return null;
+  }
 }
 
 export async function setUserNotificationDetails(
@@ -27,7 +31,11 @@ export async function setUserNotificationDetails(
     return;
   }
 
-  await redis.set(getUserNotificationDetailsKey(fid), notificationDetails);
+  try {
+    await redis.set(getUserNotificationDetailsKey(fid), JSON.stringify(notificationDetails));
+  } catch (error) {
+    console.error("Error setting notification details:", error);
+  }
 }
 
 export async function deleteUserNotificationDetails(
@@ -38,5 +46,9 @@ export async function deleteUserNotificationDetails(
     return;
   }
 
-  await redis.del(getUserNotificationDetailsKey(fid));
+  try {
+    await redis.del(getUserNotificationDetailsKey(fid));
+  } catch (error) {
+    console.error("Error deleting notification details:", error);
+  }
 }
