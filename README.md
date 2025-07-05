@@ -1,6 +1,27 @@
-# Farcaster Mini App Template
+# Tydex - Your Web3 Calendar
 
-This is a [Next.js](https://nextjs.org) starter kit to boostrap your Farcaster Mini App
+A decentralized calendar application for Web3 users, built with Next.js and Farcaster integration.
+
+## Features
+
+- 📅 **Event Management**: Create, edit, and manage calendar events
+- 🔗 **Farcaster Integration**: Connect your Farcaster account
+- 🎨 **Modern UI**: Beautiful, responsive design with Tailwind CSS
+- 🔐 **Web3 Authentication**: Secure wallet-based authentication
+- 📱 **Mobile Optimized**: Works great on all devices
+- 🔔 **Notifications**: Real-time notifications via Farcaster
+- 📊 **Data Export/Import**: Backup and restore your calendar data
+
+## Tech Stack
+
+- [Next.js 15](https://nextjs.org) - React framework
+- [Prisma](https://prisma.io) - Database ORM
+- [PostgreSQL](https://postgresql.org) - Database
+- [Redis](https://redis.io) - Caching and notifications
+- [Tailwind CSS](https://tailwindcss.com) - Styling
+- [Farcaster](https://farcaster.xyz) - Social integration
+- [Viem](https://viem.sh) - Ethereum library
+- [Wagmi](https://wagmi.sh) - React hooks for Ethereum
 
 - [Farcaster Mini Apps](https://miniapps.xyz)
 - [Tailwind CSS](https://tailwindcss.com)
@@ -9,60 +30,171 @@ This is a [Next.js](https://nextjs.org) starter kit to boostrap your Farcaster M
 
 ## Getting Started
 
-1. Install dependencies:
+### Prerequisites
 
+- Node.js 18+ 
+- PostgreSQL database
+- Redis instance (optional but recommended)
+- Vercel account (for deployment)
+
+### Local Development
+
+1. **Clone the repository**:
+```bash
+git clone <your-repo-url>
+cd Tydex-Your-Web3-Calendar
+```
+
+2. **Install dependencies**:
 ```bash
 npm install
-# or
-yarn install
-# or
-pnpm install
-# or
-bun install
 ```
 
-2. Verify environment variables:
+3. **Set up environment variables**:
+Create a `.env.local` file with the following variables:
 
-The environment variables enable the following features:
+```env
+# Database
+DATABASE_URL="postgresql://username:password@host:port/database"
 
-- Frame metadata - Sets up the Frame Embed that will be shown when you cast your frame
-- Account assocation - Allows users to add your frame to their account, enables notifications
-- Redis API keys - Enable Webhooks and background notifications for your application by storing users notification details
+# JWT Secret (generate a random string)
+JWT_SECRET="your-super-secret-jwt-key-here"
 
+# Neynar API (for Farcaster integration)
+NEYNAR_API_KEY="your-neynar-api-key"
+
+# Redis (for notifications)
+REDIS_URL="redis://username:password@host:port"
+REDIS_TOKEN="your-redis-token"
+
+# Public URLs
+NEXT_PUBLIC_URL="http://localhost:3000"
+NEXT_PUBLIC_APP_ENV="development"
+
+# Farcaster Frame Configuration
+NEXT_PUBLIC_FARCASTER_HEADER="your-farcaster-header"
+NEXT_PUBLIC_FARCASTER_PAYLOAD="your-farcaster-payload"
+NEXT_PUBLIC_FARCASTER_SIGNATURE="your-farcaster-signature"
+```
+
+4. **Set up the database**:
 ```bash
-# Required for Frame metadata
-NEXT_PUBLIC_URL=
-
-# Required to allow users to add your frame
-NEXT_PUBLIC_FARCASTER_HEADER=
-NEXT_PUBLIC_FARCASTER_PAYLOAD=
-NEXT_PUBLIC_FARCASTER_SIGNATURE=
-
-# Required for user authentication
-NEYNAR_API_KEY=
-JWT_SECRET=
-
-# Required for webhooks and background notifications
-REDIS_URL=
-REDIS_TOKEN=
+npx prisma generate
+npx prisma db push
 ```
 
-3. Start the development server:
-
+5. **Start the development server**:
 ```bash
 npm run dev
 ```
 
-4. Run a local tunneling server
+6. **Open your browser**:
+Visit [http://localhost:3000](http://localhost:3000)
 
-- [NGROK](https://ngrok.com)
-- [Local Tunnel](https://theboroer.github.io/localtunnel-www/)
+## Deployment
 
-5. Generate your Farcaster Manifest variables
+### Quick Deploy to Vercel
 
-- Follow these [instructions](https://miniapps.farcaster.xyz/docs/guides/publishing)
-- Visit [Manifest Tool](https://warpcast.com/~/developers/mini-apps/manifest)
-- Paste your tunnel domain
+1. **Push your code to GitHub**
+
+2. **Deploy using Vercel Dashboard**:
+   - Go to [vercel.com/new](https://vercel.com/new)
+   - Import your GitHub repository
+   - Configure environment variables (see below)
+   - Deploy!
+
+3. **Or use the deployment script**:
+```bash
+# On Windows
+scripts/deploy.bat
+
+# On Mac/Linux
+chmod +x scripts/deploy.sh
+./scripts/deploy.sh
+```
+
+### Environment Variables for Production
+
+Set these in your Vercel project dashboard:
+
+```env
+# Database (use Vercel Postgres or Neon)
+DATABASE_URL="postgresql://username:password@host:port/database"
+
+# JWT Secret
+JWT_SECRET="your-super-secret-jwt-key-here"
+
+# Neynar API
+NEYNAR_API_KEY="your-neynar-api-key"
+
+# Redis (use Upstash)
+REDIS_URL="redis://username:password@host:port"
+REDIS_TOKEN="your-redis-token"
+
+# Public URLs
+NEXT_PUBLIC_URL="https://your-app.vercel.app"
+NEXT_PUBLIC_APP_ENV="production"
+
+# Farcaster Frame Configuration
+NEXT_PUBLIC_FARCASTER_HEADER="your-farcaster-header"
+NEXT_PUBLIC_FARCASTER_PAYLOAD="your-farcaster-payload"
+NEXT_PUBLIC_FARCASTER_SIGNATURE="your-farcaster-signature"
+```
+
+### Database Setup
+
+1. **Create a PostgreSQL database**:
+   - [Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres) (recommended)
+   - [Neon](https://neon.tech)
+   - [Supabase](https://supabase.com)
+
+2. **Run migrations**:
+```bash
+npx prisma db push
+```
+
+### Redis Setup (Optional)
+
+For notifications and caching:
+1. Create a Redis instance at [Upstash](https://upstash.com)
+2. Add the connection details to your environment variables
+
+## Troubleshooting
+
+### Common Deployment Issues
+
+1. **Build Failures**:
+   - Check that all environment variables are set
+   - Ensure Prisma client is generated during build
+   - Verify database connection string
+
+2. **Database Connection Issues**:
+   - Check DATABASE_URL format
+   - Ensure database is accessible from Vercel
+   - Verify SSL settings if required
+
+3. **Environment Variable Issues**:
+   - Make sure all required variables are set
+   - Check for typos in variable names
+   - Ensure proper formatting (no extra spaces)
+
+### Debug Commands
+
+```bash
+# Test build locally
+npm run build
+
+# Test Prisma generation
+npx prisma generate
+
+# Test database connection
+npx prisma db push
+
+# Check environment variables
+npx vercel env ls
+```
+
+For detailed deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md).
 
 ## Template Features
 
