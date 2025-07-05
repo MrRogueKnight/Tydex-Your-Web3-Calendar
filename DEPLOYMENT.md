@@ -1,148 +1,135 @@
-# Vercel Deployment Guide for Tydex Web3 Calendar
+# Deployment Guide for Tydex - Your Web3 Calendar
 
-## Prerequisites
+## Quick Fix for Current Build Issues
 
-1. **Vercel Account**: Sign up at [vercel.com](https://vercel.com)
-2. **GitHub Repository**: Your code should be in a GitHub repository
-3. **Database**: You'll need a PostgreSQL database (recommended: Vercel Postgres or Neon)
+If you're experiencing build failures, follow these steps:
 
-## Step 1: Set Up Database
+### 1. Clean Install Dependencies
 
-### Option A: Vercel Postgres (Recommended)
-1. Go to your Vercel dashboard
-2. Create a new Postgres database
-3. Copy the connection string
-
-### Option B: Neon Database
-1. Go to [neon.tech](https://neon.tech)
-2. Create a new project
-3. Copy the connection string
-
-## Step 2: Set Up Redis (Optional but Recommended)
-1. Go to [upstash.com](https://upstash.com)
-2. Create a new Redis database
-3. Copy the connection URL and token
-
-## Step 3: Deploy to Vercel
-
-### Method 1: Vercel Dashboard
-1. Go to [vercel.com/new](https://vercel.com/new)
-2. Import your GitHub repository
-3. Configure the following settings:
-   - **Framework Preset**: Next.js
-   - **Build Command**: `npm run build`
-   - **Install Command**: `npm install`
-   - **Output Directory**: `.next`
-
-### Method 2: Vercel CLI
+**On Windows:**
 ```bash
-npm i -g vercel
-vercel login
-vercel
+scripts/clean-install.bat
 ```
 
-## Step 4: Configure Environment Variables
+**On Mac/Linux:**
+```bash
+chmod +x scripts/clean-install.sh
+./scripts/clean-install.sh
+```
 
-In your Vercel project dashboard, go to Settings > Environment Variables and add:
+### 2. Manual Clean Install
+```bash
+# Remove existing dependencies
+rm -rf node_modules package-lock.json
 
-### Required Environment Variables:
+# Install fresh dependencies
+npm install
 
+# Generate Prisma client
+npx prisma generate
+```
+
+## Environment Variables Setup
+
+### Required for Build (Optional but Recommended)
 ```env
-# Database (REQUIRED)
+# Database
 DATABASE_URL="postgresql://username:password@host:port/database"
 
-# JWT Secret (REQUIRED - generate a random string)
+# JWT Secret
 JWT_SECRET="your-super-secret-jwt-key-here"
 
-# Neynar API (REQUIRED - for Farcaster integration)
+# Neynar API
 NEYNAR_API_KEY="your-neynar-api-key"
 
-# Public URLs (REQUIRED)
+# Redis (Optional)
+REDIS_URL="redis://username:password@host:port"
+REDIS_TOKEN="your-redis-token"
+
+# Public URLs
 NEXT_PUBLIC_URL="https://your-app.vercel.app"
 NEXT_PUBLIC_APP_ENV="production"
 
-# Farcaster Frame Configuration (REQUIRED)
+# Farcaster Frame Configuration (Optional)
 NEXT_PUBLIC_FARCASTER_HEADER="your-farcaster-header"
 NEXT_PUBLIC_FARCASTER_PAYLOAD="your-farcaster-payload"
 NEXT_PUBLIC_FARCASTER_SIGNATURE="your-farcaster-signature"
 ```
 
-### Optional Environment Variables:
-
-```env
-# Redis (OPTIONAL - for notifications)
-REDIS_URL="redis://username:password@host:port"
-REDIS_TOKEN="your-redis-token"
-```
-
-### How to Get These Values:
-
-1. **DATABASE_URL**: From your PostgreSQL provider (Vercel Postgres, Neon, etc.)
-2. **JWT_SECRET**: Generate a random string (you can use: `openssl rand -base64 32`)
-3. **NEYNAR_API_KEY**: Get from [Neynar](https://neynar.com)
-4. **NEXT_PUBLIC_URL**: Your Vercel deployment URL
-5. **Farcaster Variables**: Follow the [Farcaster Mini Apps guide](https://miniapps.farcaster.xyz/docs/guides/publishing)
-6. **Redis Variables**: From [Upstash](https://upstash.com) (optional)
-
-## Step 5: Database Migration
-
-After deployment, you need to run database migrations:
+### Vercel Environment Variables
 
 1. Go to your Vercel project dashboard
-2. Go to Functions tab
-3. Create a new function or use the Vercel CLI:
+2. Navigate to Settings → Environment Variables
+3. Add each variable from the list above
+4. Make sure to set the environment to "Production"
 
+## Database Setup
+
+### Option 1: Vercel Postgres (Recommended)
+1. In your Vercel dashboard, go to Storage
+2. Create a new Postgres database
+3. Copy the connection string to `DATABASE_URL`
+4. Run migrations: `npx prisma db push`
+
+### Option 2: External Database
+- [Neon](https://neon.tech) - Serverless Postgres
+- [Supabase](https://supabase.com) - Open source Firebase alternative
+- [Railway](https://railway.app) - Easy database hosting
+
+## Redis Setup (Optional)
+
+For notifications and caching:
+1. Create account at [Upstash](https://upstash.com)
+2. Create a new Redis database
+3. Copy connection details to environment variables
+
+## Deployment Steps
+
+### 1. Push Code to GitHub
 ```bash
-vercel env pull .env.local
-npx prisma db push
+git add .
+git commit -m "Fix build issues and update dependencies"
+git push origin main
 ```
 
-## Step 6: Verify Deployment
+### 2. Deploy on Vercel
+- Connect your GitHub repository to Vercel
+- Set environment variables
+- Deploy
 
-1. **Check your deployment logs** in Vercel dashboard
-2. **Visit your deployed URL**
-3. **Test the health endpoint**: Visit `https://your-app.vercel.app/api/health`
-4. **Test the application functionality**
-
-### Health Check Endpoint
-
-The `/api/health` endpoint will show you:
-- Environment variable status
-- Database connection status
-- Application version
-- System status
-
-This helps you verify that all required services are properly configured.
+### 3. Verify Deployment
+- Check build logs for any errors
+- Test the health endpoint: `https://your-app.vercel.app/api/health`
+- Verify database connection
 
 ## Troubleshooting
 
-### Common Issues:
+### Common Build Errors
 
-1. **Build Failures**:
-   - Check that all environment variables are set
-   - Ensure Prisma client is generated during build
-   - Verify database connection string
+#### 1. TypeScript Errors
+- **Error**: Redis client type conflicts
+- **Solution**: Fixed in `lib/redis.ts` - updated type definitions
 
-2. **Database Connection Issues**:
-   - Check DATABASE_URL format
-   - Ensure database is accessible from Vercel
-   - Verify SSL settings if required
+#### 2. Dependency Conflicts
+- **Error**: React version conflicts, Farcaster SDK version issues
+- **Solution**: Updated `package.json` with compatible versions
 
-3. **Environment Variable Issues**:
-   - Make sure all required variables are set
-   - Check for typos in variable names
-   - Ensure proper formatting (no extra spaces)
+#### 3. Environment Variable Issues
+- **Error**: Missing required environment variables
+- **Solution**: All environment variables are now optional during build
 
-4. **Prisma Issues**:
-   - Run `npx prisma generate` locally to test
-   - Check Prisma schema syntax
-   - Verify database schema matches Prisma schema
+#### 4. Prisma Generation Issues
+- **Error**: Prisma client not generated
+- **Solution**: Added `prisma generate` to build script
 
-### Debug Commands:
+### Debug Commands
 
 ```bash
 # Test build locally
 npm run build
+
+# Check TypeScript errors
+npx tsc --noEmit
 
 # Test Prisma generation
 npx prisma generate
@@ -154,10 +141,64 @@ npx prisma db push
 npx vercel env ls
 ```
 
+### Health Check Endpoint
+
+After deployment, test the health endpoint:
+```
+https://your-app.vercel.app/api/health
+```
+
+This will show:
+- Environment variable status
+- Database connection status
+- Application version
+
+## Performance Optimization
+
+### 1. Enable Caching
+- Set up Redis for session storage
+- Configure CDN for static assets
+
+### 2. Database Optimization
+- Use connection pooling
+- Enable query optimization
+- Set up proper indexes
+
+### 3. Build Optimization
+- Enable Next.js build caching
+- Use Vercel's edge functions where appropriate
+
+## Monitoring
+
+### 1. Vercel Analytics
+- Enable Vercel Analytics in dashboard
+- Monitor performance metrics
+
+### 2. Error Tracking
+- Set up error monitoring (Sentry, LogRocket)
+- Monitor API endpoint health
+
+### 3. Database Monitoring
+- Monitor database performance
+- Set up alerts for connection issues
+
+## Security Checklist
+
+- [ ] JWT_SECRET is set and secure
+- [ ] Database connection uses SSL
+- [ ] Environment variables are properly configured
+- [ ] API endpoints have proper validation
+- [ ] CORS is configured correctly
+- [ ] Rate limiting is implemented
+
 ## Support
 
-If you encounter issues:
-1. Check Vercel deployment logs
-2. Review this guide
-3. Check the project's GitHub issues
-4. Contact support with specific error messages 
+If you continue to experience issues:
+
+1. Check the build logs in Vercel dashboard
+2. Test the health endpoint
+3. Verify all environment variables are set
+4. Check database connectivity
+5. Review the troubleshooting section above
+
+For additional help, refer to the main README.md file. 

@@ -93,6 +93,19 @@ Visit [http://localhost:3000](http://localhost:3000)
 
 ## Deployment
 
+### Quick Fix for Build Issues
+
+If you're experiencing build failures, run this first:
+
+```bash
+# On Windows
+scripts/clean-install.bat
+
+# On Mac/Linux
+chmod +x scripts/clean-install.sh
+./scripts/clean-install.sh
+```
+
 ### Quick Deploy to Vercel
 
 1. **Push your code to GitHub**

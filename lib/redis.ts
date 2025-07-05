@@ -2,7 +2,7 @@ import { createClient } from 'redis';
 import { env } from './env';
 
 const globalForRedis = globalThis as unknown as {
-  redis: ReturnType<typeof createClient> | undefined;
+  redis: ReturnType<typeof createClient> | null | undefined;
 };
 
 // Only create Redis client if URL is provided
