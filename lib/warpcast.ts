@@ -1,41 +1,42 @@
 import { env } from "./env";
 
 /**
- * Get the farcaster manifest for the frame, generate yours from Warpcast Mobile
- *  On your phone to Settings > Developer > Domains > insert website hostname > Generate domain manifest
- * @returns The farcaster manifest for the frame
+ * Get the farcaster manifest for the Mini App
+ * This generates the manifest that Farcaster expects for Mini App submission
+ * @returns The farcaster Mini App manifest
  */
 export async function getFarcasterManifest() {
   const appUrl = env.NEXT_PUBLIC_URL || 'http://localhost:3000';
   
   return {
-    name: "Tydex Calendar",
-    description: "Your Web3 Calendar",
-    icon: `${appUrl}/images/icon.png`,
-    appUrl: appUrl,
-    appId: "tydex-calendar",
-    app: {
-      name: "Tydex Calendar",
-      description: "Your Web3 Calendar",
-      icon: `${appUrl}/images/icon.png`,
-      appUrl: appUrl,
-      appId: "tydex-calendar",
-    },
     frame: {
-      frameUrl: `${appUrl}/dynamic-image-example/1`,
-      frameButtonText: "Launch App",
-      framePostUrl: `${appUrl}/api/webhook`,
-      frameInputText: "Enter your message",
-      frameImageUrl: `${appUrl}/images/feed.png`,
-      frameImageAspectRatio: "1.91:1",
-      frameImageWidth: 600,
-      frameImageHeight: 315,
-      frameImageAlt: "Tydex Calendar",
-      frameImageOverlay: {
-        header: env.NEXT_PUBLIC_FARCASTER_HEADER || '',
-        payload: env.NEXT_PUBLIC_FARCASTER_PAYLOAD || '',
-        signature: env.NEXT_PUBLIC_FARCASTER_SIGNATURE || '',
-      },
+      name: "Tydex-Your-Web3-Calendar",
+      version: "1",
+      iconUrl: `${appUrl}/images/icon.png`,
+      homeUrl: appUrl,
+      imageUrl: `${appUrl}/images/feed.png`,
+      buttonTitle: "Launch Tydex",
+      splashImageUrl: `${appUrl}/images/splash.png`,
+      splashBackgroundColor: "#4F46E5",
+      webhookUrl: `${appUrl}/api/webhook`,
+      subtitle: "Plan, Share & Sync Your Web3 Events",
+      description: "Tydex is your decentralized calendar hub. Discover, create, and share Web3 events all seamlessly integrated with Farcaster. Stay in sync with your favorite communities and never miss out on the action.",
+      primaryCategory: "productivity",
+      tags: [
+        "calendar",
+        "web3",
+        "social",
+        "trending",
+        "mini"
+      ],
+      tagline: "Your Web3 Calendar",
+      ogTitle: "Tydex – Your Web3 Calendar",
+      ogDescription: "Create and discover Web3 events"
     },
+    accountAssociation: {
+      header: env.NEXT_PUBLIC_FARCASTER_HEADER || '',
+      payload: env.NEXT_PUBLIC_FARCASTER_PAYLOAD || '',
+      signature: env.NEXT_PUBLIC_FARCASTER_SIGNATURE || ''
+    }
   };
 }
