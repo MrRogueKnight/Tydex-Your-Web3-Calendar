@@ -1,6 +1,8 @@
-# Tydex - Your Web3 Calendar
+# Tydex – Your Web3 Calendar 🗓️
 
-A decentralized calendar application for Web3 users, built with Next.js and Farcaster integration.
+[View on Farcaster](https://farcaster.xyz/miniapps/xD77ieL6mUFP/tydex-your-web3-calendar)
+
+Tydex is a Mini App for Farcaster that helps you discover, organize, and manage Web3 events right from your feed. Designed for seamless integration with the Farcaster ecosystem, Tydex brings decentralized event coordination to the social layer of Web3.
 
 ## Features
 
